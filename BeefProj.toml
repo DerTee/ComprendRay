@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", SDL2 = "*"}
+
+[Project]
+Name = "ComprendRay"
+TargetType = "BeefGUIApplication"
+StartupObject = "ComprendRay.Program"
