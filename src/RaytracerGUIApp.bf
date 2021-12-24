@@ -12,8 +12,7 @@ namespace ComprendRay
 		private RenderBuffer mBuffer;
 		private System.Threading.Thread mRenderthread;
 
-		HittableList mScene = random_scene() ~ _.clear(); // the scene / world / list of raytraceable objects 
-
+		HittableList mScene = random_scene() ~ delete _; 
 
 		/*let lookfrom = Point3(13, 2, 3);
 		let lookat = Point3(0, 0, 0);
@@ -44,24 +43,13 @@ namespace ComprendRay
 			// SDL.FillRect(mScreen, scope SDL.Rect(0, 0, 100, 100), 0xff0000);
 
 			let user_pressed_start_render = true;
-			if (user_pressed_start_render && mRenderthread == null)
+			if (user_pressed_start_render)
 			{
-				void incremental_render_lambda()
-			{
-					render_scene(ref mScene, ref mCam, ref mBuffer);
-				} 
-				// System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
-				System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
-
-				mRenderthread = new System.Threading.Thread(incremental_render_call);
-				mRenderthread.SetName("IncrementalRenderThread");
-				mRenderthread.Start();
+				StartNewRenderThread();
 			} 
 
 			// ToDo clean this mess up! this is a bug, because we can't rely mBuffer.current_sample, also we should not
 			// check this internal state here
-			if (!mRenderthread.IsAlive)
-			{
 			for (let x < mBuffer.renderparameters.image_width)
 			{
 				for (let y < mBuffer.renderparameters.image_height)
@@ -75,9 +63,16 @@ namespace ComprendRay
 			// buffers!
 			if (mBuffer.current_sample < mBuffer.renderparameters.samples_per_pixel)
 			{
-					delete mRenderthread; 
+				StartNewRenderThread();
+			}
+		}
 
-					// ToDo: this is copy paste from above, fix this!!
+		public void StartNewRenderThread()
+		{
+			if (mRenderthread !== null)
+			{
+				return;
+			}
 			void incremental_render_lambda()
 			{
 				render_scene(ref mScene, ref mCam, ref mBuffer);
@@ -88,12 +83,6 @@ namespace ComprendRay
 			mRenderthread = new System.Threading.Thread(incremental_render_call);
 			mRenderthread.SetName("IncrementalRenderThread");
 			mRenderthread.Start();
-		}
-				else // render finished -> write the ppm file
-				{
-					delete mRenderthread;
-				}
-			}
 		}
 
 		public static void set_pixel(SDL.Surface* surface, int32 x, int32 y, uint32 pixel)

@@ -9,6 +9,11 @@ namespace ComprendRay
 		public this() { }
 		public this(Hittable object) { add(object); }
 
+		public ~this()
+		{
+			clear();
+		}
+
 		public void clear() { objects.Clear(); }
 		public void add(Hittable object) { objects.Add(object); }
 
