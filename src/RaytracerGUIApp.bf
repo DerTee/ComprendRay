@@ -47,7 +47,7 @@ namespace ComprendRay
 			if (user_pressed_start_render && mRenderthread == null)
 			{
 				void incremental_render_lambda()
-				{
+			{
 					render_scene(ref mScene, ref mCam, ref mBuffer);
 				} 
 				// System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
@@ -62,33 +62,33 @@ namespace ComprendRay
 			// check this internal state here
 			if (!mRenderthread.IsAlive)
 			{
-				for (let x < mBuffer.renderparameters.image_width)
-				{
-					for (let y < mBuffer.renderparameters.image_height)
-					{ 
-						/*let last_finished_sample = 0;*/
+			for (let x < mBuffer.renderparameters.image_width)
+			{
+				for (let y < mBuffer.renderparameters.image_height)
+				{ 
+					/*let last_finished_sample = 0;*/ 
 						let color = mBuffer[x, y];
-						set_pixel(mScreen, x, y, Color.to_uint(color));
-					}
-				} 
-				// render next sample UNTESTESTED IF THIS WORKS!! check if the subsequent samples are filled in pixel
-				// buffers!
-				if (mBuffer.current_sample < mBuffer.renderparameters.samples_per_pixel)
-				{
+					set_pixel(mScreen, x, y, Color.to_uint(color));
+				}
+			} 
+			// render next sample UNTESTESTED IF THIS WORKS!! check if the subsequent samples are filled in pixel
+			// buffers!
+			if (mBuffer.current_sample < mBuffer.renderparameters.samples_per_pixel)
+			{
 					delete mRenderthread; 
 
 					// ToDo: this is copy paste from above, fix this!!
-					void incremental_render_lambda()
-					{
-						render_scene(ref mScene, ref mCam, ref mBuffer);
-					} 
-					// System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
-					System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
+			void incremental_render_lambda()
+			{
+				render_scene(ref mScene, ref mCam, ref mBuffer);
+			} 
+			// System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
+			System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
 
-					mRenderthread = new System.Threading.Thread(incremental_render_call);
-					mRenderthread.SetName("IncrementalRenderThread");
-					mRenderthread.Start();
-				}
+			mRenderthread = new System.Threading.Thread(incremental_render_call);
+			mRenderthread.SetName("IncrementalRenderThread");
+			mRenderthread.Start();
+		}
 				else // render finished -> write the ppm file
 				{
 					delete mRenderthread;
@@ -98,9 +98,8 @@ namespace ComprendRay
 
 		public static void set_pixel(SDL.Surface* surface, int32 x, int32 y, uint32 pixel)
 		{
-			uint32* target_pixel = (uint32*)((uint8*)(&surface.pixels) + y * surface.pitch + x * 4); 
-			// Todo: fix this, not working, says error: access violation 
-			/**target_pixel = pixel;*/
+			uint32* target_pixel = (uint32*)((uint8*)(surface.pixels) + y * surface.pitch + x * 4);
+			*target_pixel = pixel;
 		}
 
 		static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer)
