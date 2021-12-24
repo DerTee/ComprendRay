@@ -95,13 +95,15 @@ namespace ComprendRay
 			let r_out_perp = etai_over_etat * (uv + cos_theta * n);
 			let r_out_parallel = -1 * Math.Sqrt(Math.Abs(1.0 - r_out_perp.length_squared())) * n;
 			return r_out_perp + r_out_parallel;
-		}
+		} 
 
+		/// pack float color values from 0 - 1 into 32 bits, (RED 1.byte, GREEN 2.byte, BLUE 3.byte, ALPHA 4.byte)
 		public static uint32 to_uint(Color col)
 		{
-			return (uint32)(Math.Clamp(col.x, 0.0, 0.999) * 256) << 24
-				| (uint32)(Math.Clamp(col.y, 0.0, 0.999) * 256) << 16
-				| (uint32)(Math.Clamp(col.z, 0.0, 0.999) * 255) << 8;
+			return (uint32)(Math.Clamp(col.x, 0.0, 0.999) * 0xff) << 24
+				| (uint32)(Math.Clamp(col.y, 0.0, 0.999) * 0xff) << 16
+				| (uint32)(Math.Clamp(col.z, 0.0, 0.999) * 0xff) << 8
+				| 0xff;
 		}
 
 		[Inline]
