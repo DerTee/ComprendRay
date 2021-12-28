@@ -12,8 +12,8 @@ namespace ComprendRay
 		public this(RenderParameters rp)
 		{
 			renderparameters = rp;
-			let samples = (int16)rp.samples_per_pixel;
-			pixelbuffers = new PixelBuffer[samples];
+
+			pixelbuffers = new PixelBuffer[rp.samples_per_pixel];
 			for (let i < pixelbuffers.Count)
 			{
 				pixelbuffers[i] = PixelBuffer(rp.image_width, rp.image_height);
