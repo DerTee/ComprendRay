@@ -14,10 +14,11 @@ namespace ComprendRay.Utils
 		public static String colors_to_ppm(RenderBuffer buffer)
 		{
 			let render_params = buffer.renderparameters;
-			var imageData = new $"P3\n{render_params.image_width} {render_params.image_height}\n255\n"; 
+			// var imageData = new $"P3\n{render_params.image_width} {render_params.image_height}\n255\n";
+			var imageData = new $"P3\n{render_params.image_height} {render_params.image_width}\n255\n";
 
 
-			// Divide the color by the number of samples 
+			// Divide the color by the number of samples
 			/*let scale = 1.0 / render_params.samples_per_pixel;
 			r = Math.Sqrt(scale * r);
 			g = Math.Sqrt(scale * g);
@@ -37,7 +38,7 @@ namespace ComprendRay.Utils
 						);
 				}
 			}
-			return imageData; 
+			return imageData;
 			/*write_color(ref imageData, *pixel_color, render_params.samples_per_pixel);*/
 		}
 	}
