@@ -7,18 +7,18 @@ namespace ComprendRay
 {
 	class RaytracerGUIApp : SDLApp
 	{
-		public String Title = new .("ComprendRay") ~ delete _; 
+		public String Title = new .("ComprendRay") ~ delete _;
 		/*private bool mIsRendering = false;*/
 		private RenderBuffer mBuffer;
 		private System.Threading.Thread mRenderthread;
 
-		HittableList mScene = random_scene() ~ delete _; 
+		HittableList mScene = random_scene() ~ delete _;
 
 		/*let lookfrom = Point3(13, 2, 3);
 		let lookat = Point3(0, 0, 0);
 		let vup = Vec3(0, 1, 0);
 		let dist_to_focus = 10;
-		let aperture = 0.1;*/ 
+		let aperture = 0.1;*/
 
 		// Camera
 		// var cam = scope Camera(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
@@ -39,31 +39,25 @@ namespace ComprendRay
 		}
 
 		public override void Draw()
-		{ 
+		{
 			// SDL.FillRect(mScreen, scope SDL.Rect(0, 0, 100, 100), 0xff0000);
 
 			let user_pressed_start_render = true;
 			if (user_pressed_start_render)
 			{
 				StartNewRenderThread();
-			} 
+			}
 
 			// ToDo clean this mess up! this is a bug, because we can't rely mBuffer.current_sample, also we should not
 			// check this internal state here
 			for (let x < mBuffer.renderparameters.image_width)
 			{
 				for (let y < mBuffer.renderparameters.image_height)
-				{ 
-					/*let last_finished_sample = 0;*/ 
-						let color = mBuffer[x, y];
+				{
+					/*let last_finished_sample = 0;*/
+					let color = mBuffer[x, y];
 					set_pixel(mScreen, x, y, Color.to_uint(color));
 				}
-			} 
-			// render next sample UNTESTESTED IF THIS WORKS!! check if the subsequent samples are filled in pixel
-			// buffers!
-			if (mBuffer.current_sample < mBuffer.renderparameters.samples_per_pixel)
-			{
-				StartNewRenderThread();
 			}
 		}
 
@@ -76,7 +70,7 @@ namespace ComprendRay
 			void incremental_render_lambda()
 			{
 				render_scene(ref mScene, ref mCam, ref mBuffer);
-			} 
+			}
 			// System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
 			System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
 
@@ -93,7 +87,7 @@ namespace ComprendRay
 
 		static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer)
 		{
-			let render_params = buffer.renderparameters; 
+			let render_params = buffer.renderparameters;
 			// var start_time = DateTime.Now; 
 
 			// Render
@@ -101,48 +95,51 @@ namespace ComprendRay
 			// var Stream = System.Console.Out;
 
 			var rand = scope Random();
-			for (int32 y = render_params.image_height - 1; y >= 0; --y)
-			{ 
-				// Stream.Write("\rScanlines remaining: {0,5}", j);
-				for (int32 x < render_params.image_width)
+			for (int32 current_sample < render_params.samples_per_pixel)
+			{
+				for (int32 y = render_params.image_height - 1; y >= 0; --y)
 				{
-					for (int32 s < render_params.samples_per_pixel)
+					// Stream.Write("\rScanlines remaining: {0,5}", j);
+					for (int32 x < render_params.image_width)
 					{
-						let u = (x + rand.NextDouble()) / (render_params.image_width - 1);
-						let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
-						var r = cam.get_ray(u, v);
-						buffer[x, y] = ray_color(ref r, world, render_params.max_depth);
+						for (int32 s < render_params.samples_per_pixel)
+						{
+							let u = (x + rand.NextDouble()) / (render_params.image_width - 1);
+							let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
+							var r = cam.get_ray(u, v);
+							buffer[x, y] = ray_color(ref r, world, render_params.max_depth);
+						}
 					}
 				}
+
+				// Stream.Write(scope $"\nDone. Render time: {DateTime.Now - start_time}\n");
+
+				let fileName = scope $"image_sample_{current_sample}.ppm";
+
+				// TODO actually wanted to allocate from outside, pass to the function, but coulnt get it to work quickly,
+				// fucking beef syntax hell, 1000 ways to do things and only very few are correct
+				/*var imageData = new String();*/
+				/*defer delete imageData;*/
+				/*colors_to_ppm(buffer, ref imageData);*/
+				let imageData = colors_to_ppm(buffer);
+				System.IO.File.WriteAllText(fileName, imageData);
+				delete imageData;
+
+				var psi = scope System.Diagnostics.ProcessStartInfo();
+				psi.SetFileName(fileName);
+				var process = scope System.Diagnostics.SpawnedProcess();
+				process.Start(psi);
+
+				if (buffer.current_sample < render_params.samples_per_pixel - 1)
+				{
+					buffer.current_sample++;
+				}
 			}
-			let current_sample = buffer.current_sample; 
-
-
-
-			// Stream.Write(scope $"\nDone. Render time: {DateTime.Now - start_time}\n");
-
-			let fileName = scope $"image_sample_{current_sample}.ppm"; 
-
-			// TODO actually wanted to allocate from outside, pass to the function, but coulnt get it to work quickly,
-			// fucking beef syntax hell, 1000 ways to do things and only very few are correct 
-			/*var imageData = new String();*/ 
-			/*defer delete imageData;*/ 
-			/*colors_to_ppm(buffer, ref imageData);*/
-			let imageData = colors_to_ppm(buffer);
-			System.IO.File.WriteAllText(fileName, imageData);
-			delete imageData;
-
-			buffer.current_sample++;
-
-			var psi = scope System.Diagnostics.ProcessStartInfo();
-			psi.SetFileName(fileName);
-			var process = scope System.Diagnostics.SpawnedProcess();
-			process.Start(psi);
 		}
 
 		static Color ray_color(ref Ray r, Hittable world, int depth)
 		{
-			var rec = hit_record(); 
+			var rec = hit_record();
 
 			// If we've exceeded the ray bounce limit, no more light is gathered.
 			if (depth <= 0)
@@ -180,20 +177,20 @@ namespace ComprendRay
 					if ((center - Point3(4, 0.2, 0)).length() > 0.9)
 					{
 						if (choose_mat < 0.8)
-						{ 
+						{
 							// diffuse
 							let albedo = Color.random() * Color.random();
 							let sphere_material = new Lambertian(albedo);
 							world.add(new Sphere(center, 0.2, sphere_material));
 						} else if (choose_mat < 0.95)
-						{ 
+						{
 							// metal
 							let albedo = Color.random(0.5, 1);
 							let fuzz = rand.NextDouble() * 0.5;
 							let sphere_material = new Metal(albedo, fuzz);
 							world.add(new Sphere(center, 0.2, sphere_material));
 						} else
-						{ 
+						{
 							// glass
 							let sphere_material = new Dielectric(1.5);
 							world.add(new Sphere(center, 0.2, sphere_material));
