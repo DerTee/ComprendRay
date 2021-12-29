@@ -16,6 +16,11 @@ namespace ComprendRay
 			mat_ptr = m;
 		}
 
+		public ~this()
+		{
+			delete mat_ptr;
+		}
+
 		public bool hit(Ray r, double t_min, double t_max, ref hit_record rec)
 		{
 			Vec3 oc = r.origin - center;
