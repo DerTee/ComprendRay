@@ -9,7 +9,7 @@ namespace ComprendRay
 	{
 		public String Title = new .("ComprendRay") ~ delete _;
 		/*private bool mIsRendering = false;*/
-		private RenderBuffer mBuffer;
+		private RenderBuffer mBuffer ~ delete _;
 		private System.Threading.Thread mRenderthread;
 
 		HittableList mScene = random_scene() ~ delete _;
