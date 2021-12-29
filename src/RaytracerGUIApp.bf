@@ -102,13 +102,10 @@ namespace ComprendRay
 					// Stream.Write("\rScanlines remaining: {0,5}", j);
 					for (int32 x < render_params.image_width)
 					{
-						for (int32 s < render_params.samples_per_pixel)
-						{
-							let u = (x + rand.NextDouble()) / (render_params.image_width - 1);
-							let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
-							var r = cam.get_ray(u, v);
-							buffer[x, y] = ray_color(ref r, world, render_params.max_depth);
-						}
+						let u = (x + rand.NextDouble()) / (render_params.image_width - 1);
+						let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
+						var r = cam.get_ray(u, v);
+						buffer[x, y] = ray_color(ref r, world, render_params.max_depth);
 					}
 				}
 
@@ -116,7 +113,7 @@ namespace ComprendRay
 
 				let fileName = scope $"image_sample_{current_sample}.ppm";
 
-				// TODO actually wanted to allocate from outside, pass to the function, but coulnt get it to work quickly,
+				// TODO actually wanted to allocate from outside, pass to the function, but couldnt get it to work quickly,
 				// fucking beef syntax hell, 1000 ways to do things and only very few are correct
 				/*var imageData = new String();*/
 				/*defer delete imageData;*/
@@ -205,7 +202,6 @@ namespace ComprendRay
 			world.add(new Sphere(Point3(-4, 1, 0), 1.0, material2));
 			let material3 = new Metal(Color(0.7, 0.6, 0.5), 0.0);
 			world.add(new Sphere(Point3(4, 1, 0), 1.0, material3));
-
 			return world;
 		}
 	}
