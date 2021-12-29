@@ -4,17 +4,15 @@ namespace ComprendRay
 {
 	class HittableList : Hittable
 	{
-		public var objects = new List<Hittable>() ~ delete _;
+		public var objects = new List<Hittable>() ~
+			{
+				for (var o in _) delete o;
+				delete _;
+			};
 
 		public this() { }
 		public this(Hittable object) { add(object); }
 
-		public ~this()
-		{
-			clear();
-		}
-
-		public void clear() { objects.Clear(); }
 		public void add(Hittable object) { objects.Add(object); }
 
 		public bool hit(Ray r, double t_min, double t_max, ref hit_record rec)
