@@ -11,9 +11,8 @@ namespace ComprendRay.Utils
 		}
 
 
-		public static String colors_to_ppm(RenderBuffer buffer)
+		public static String colors_to_ppm(PixelBuffer buffer, RenderParameters render_params)
 		{
-			let render_params = buffer.renderparameters;
 			// var imageData = new $"P3\n{render_params.image_width} {render_params.image_height}\n255\n";
 			var imageData = new $"P3\n{render_params.image_height} {render_params.image_width}\n255\n";
 
@@ -27,7 +26,7 @@ namespace ComprendRay.Utils
 			{
 				for (var y < render_params.image_height)
 				{
-					let pixel = buffer[x, y];
+					let pixel = buffer.pixels[x, y];
 					let r = pixel.x;
 					let g = pixel.y;
 					let b = pixel.z;

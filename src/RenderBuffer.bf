@@ -4,7 +4,12 @@ namespace ComprendRay
 {
 	class RenderBuffer
 	{
+		/// every single sample, basically we have a raw progression of 1-sample images here, which are are averaged and composed into a single one
 		public PixelBuffer[] pixelbuffers;
+
+		/// the image that is composed from all pixelbuffers, can be in progress, so it's not necessarily the final image, just the "most finished" one
+		public PixelBuffer composed_buffer;
+
 		public RenderParameters renderparameters;
 		public int32 current_sample = 0;
 		public Vec2Int current_pixel = .(0, 0);
@@ -18,6 +23,7 @@ namespace ComprendRay
 			{
 				pixelbuffers[i] = PixelBuffer(rp.image_width, rp.image_height);
 			}
+			composed_buffer = PixelBuffer(rp.image_width, rp.image_height);
 		}
 
 		public ~this()
@@ -27,6 +33,7 @@ namespace ComprendRay
 				delete pb.pixels;
 			}
 			delete pixelbuffers;
+			delete composed_buffer.pixels;
 		}
 
 		public Color this[int x, int y]
@@ -38,6 +45,16 @@ namespace ComprendRay
 			[Inline] set
 			{
 				pixelbuffers[current_sample].pixels[x, y] = value;
+
+				// TODO this is a shitty, unexpected, implicit way to create the composed buffer, make it explicit and expected
+				let scale = 1.0 / current_sample;
+				var composed_pixel = Color();
+				for (let i < current_sample)
+				{
+					composed_pixel += scale * pixelbuffers[i].pixels[x, y];
+					// composed_pixel += Math.Sqrt(scale * pixelbuffers[i].pixels[x, y]);
+				}
+				composed_buffer.pixels[x, y] = composed_pixel;
 			}
 		}
 	}

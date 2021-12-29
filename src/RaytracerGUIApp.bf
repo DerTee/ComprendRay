@@ -118,7 +118,7 @@ namespace ComprendRay
 				/*var imageData = new String();*/
 				/*defer delete imageData;*/
 				/*colors_to_ppm(buffer, ref imageData);*/
-				let imageData = colors_to_ppm(buffer);
+				let imageData = colors_to_ppm(buffer.pixelbuffers[buffer.current_sample], buffer.renderparameters);
 				System.IO.File.WriteAllText(fileName, imageData);
 				delete imageData;
 
@@ -132,6 +132,24 @@ namespace ComprendRay
 					buffer.current_sample++;
 				}
 			}
+
+
+			// Todo: Fix COPY PASTE!!!!
+			let fileName = scope $"image_sample_composed.ppm";
+
+			// TODO actually wanted to allocate from outside, pass to the function, but couldnt get it to work quickly,
+			// fucking beef syntax hell, 1000 ways to do things and only very few are correct
+			/*var imageData = new String();*/
+			/*defer delete imageData;*/
+			/*colors_to_ppm(buffer, ref imageData);*/
+			let imageData = colors_to_ppm(buffer.composed_buffer, buffer.renderparameters);
+			System.IO.File.WriteAllText(fileName, imageData);
+			delete imageData;
+
+			var psi = scope System.Diagnostics.ProcessStartInfo();
+			psi.SetFileName(fileName);
+			var process = scope System.Diagnostics.SpawnedProcess();
+			process.Start(psi);
 		}
 
 		static Color ray_color(ref Ray r, Hittable world, int depth)
