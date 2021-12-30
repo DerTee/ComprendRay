@@ -14,15 +14,15 @@ namespace ComprendRay
 
 		HittableList mScene = random_scene() ~ delete _;
 
-		/*let lookfrom = Point3(13, 2, 3);
-		let lookat = Point3(0, 0, 0);
-		let vup = Vec3(0, 1, 0);
-		let dist_to_focus = 10;
-		let aperture = 0.1;*/
-
 		// Camera
-		// var cam = scope Camera(lookfrom, lookat, vup, 20.0, aspect_ratio, aperture, dist_to_focus);
-		Camera mCam = new .(Point3(13, 2, 3), Point3(0, 0, 0), Vec3(0, 1, 0), 20.0, 3 / 2, 0.1, 10) ~ delete _;
+		Camera mCam = new .(
+			Point3(13, 2, 3), // lookfrom
+			Point3(0, 0, 0), // lookat
+			Vec3(0, 1, 0), // up vector
+			20.0, // dist_to_focus
+			3 / 2, // aspect ratio
+			0.1, // aperture
+			10) ~ delete _;
 
 		public new void Init()
 		{
