@@ -4,11 +4,11 @@ namespace ComprendRay
 {
 	struct RenderParameters
 	{
-		public double aspect_ratio = 3.0 / 2.0;
+		public double aspect_ratio = 120 / 80;
 		public int32 image_width = 120; // 320;
 		public int32 image_height = 80; // 240;
-		public int32 samples_per_pixel = 3;
-		public int32 max_depth = 50;
+		public int32 samples_per_pixel = 5;
+		public int32 max_depth = 2;
 
 		public enum ParameterError
 		{
@@ -26,14 +26,14 @@ namespace ComprendRay
 				switch (arg) {
 				case "--samples","-s":
 					if (next_arg.IsEmpty)
-					{ 
+					{
 						// System.Console.Error.WriteLine($"Parameter {arg} needs number of samples after it!");
-						return .Err(.Error(scope $"Parameter {arg} needs number of samples after it!")); 
+						return .Err(.Error(scope $"Parameter {arg} needs number of samples after it!"));
 						// break;
 					}
 					let samples = System.Int32.Parse(next_arg);
 					switch (samples) {
-					case .Err: 
+					case .Err:
 						// System.Console.Error.WriteLine($"{next_arg} is not a valid number of samples! Parameter {arg} needs number of samples after it!");
 						return .Err(.Error(scope $"{next_arg} is not a valid number of samples! Parameter {arg} needs number of samples after it!"));
 					case .Ok:
@@ -47,7 +47,7 @@ namespace ComprendRay
 					}
 					let width = System.Int32.Parse(next_arg);
 					switch (width) {
-					case .Err: 
+					case .Err:
 						// System.Console.Error.WriteLine($"{next_arg} is not a valid pixel width!");
 						return .Err(.Error(scope $"{next_arg} is not a valid pixel width!"));
 					case .Ok: rp.image_width = width;
