@@ -97,7 +97,7 @@ namespace ComprendRay
 			var rand = scope Random();
 			for (int32 current_sample < render_params.samples_per_pixel)
 			{
-				for (int32 y = render_params.image_height - 1; y >= 0; --y)
+				for (int32 y < render_params.image_height)
 				{
 					// Stream.Write("\rScanlines remaining: {0,5}", j);
 					for (int32 x < render_params.image_width)
@@ -113,19 +113,9 @@ namespace ComprendRay
 
 				let fileName = scope $"image_sample_{current_sample}.ppm";
 
-				// TODO actually wanted to allocate from outside, pass to the function, but couldnt get it to work quickly,
-				// fucking beef syntax hell, 1000 ways to do things and only very few are correct
-				/*var imageData = new String();*/
-				/*defer delete imageData;*/
-				/*colors_to_ppm(buffer, ref imageData);*/
-				let imageData = colors_to_ppm(buffer.pixelbuffers[buffer.current_sample], buffer.renderparameters);
+				let imageData = buffer.pixelbuffers[buffer.current_sample].to_ppm(buffer.renderparameters);
 				System.IO.File.WriteAllText(fileName, imageData);
 				delete imageData;
-
-				var psi = scope System.Diagnostics.ProcessStartInfo();
-				psi.SetFileName(fileName);
-				var process = scope System.Diagnostics.SpawnedProcess();
-				process.Start(psi);
 
 				if (buffer.current_sample < render_params.samples_per_pixel - 1)
 				{
@@ -133,19 +123,13 @@ namespace ComprendRay
 				}
 			}
 
-
-			// Todo: Fix COPY PASTE!!!!
 			let fileName = scope $"image_sample_composed.ppm";
 
-			// TODO actually wanted to allocate from outside, pass to the function, but couldnt get it to work quickly,
-			// fucking beef syntax hell, 1000 ways to do things and only very few are correct
-			/*var imageData = new String();*/
-			/*defer delete imageData;*/
-			/*colors_to_ppm(buffer, ref imageData);*/
-			let imageData = colors_to_ppm(buffer.composed_buffer, buffer.renderparameters);
+			let imageData = buffer.composed_buffer.to_ppm(buffer.renderparameters);
 			System.IO.File.WriteAllText(fileName, imageData);
 			delete imageData;
 
+			// open finished composed image in system image viewer
 			var psi = scope System.Diagnostics.ProcessStartInfo();
 			psi.SetFileName(fileName);
 			var process = scope System.Diagnostics.SpawnedProcess();
