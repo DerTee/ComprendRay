@@ -84,7 +84,6 @@ namespace ComprendRay
 				}
 			}
 			return imageData;
-			/*write_color(ref imageData, *pixel_color, render_params.samples_per_pixel);*/
 		}
 	}
 }
