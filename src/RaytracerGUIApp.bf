@@ -10,7 +10,9 @@ namespace ComprendRay
 		public String Title = new .("ComprendRay") ~ delete _;
 		/*private bool mIsRendering = false;*/
 		private RenderBuffer mBuffer ~ delete _;
-		private System.Threading.Thread mRenderthread;
+		private System.Threading.Thread mRenderthread1;
+		private System.Threading.Thread mRenderthread2;
+		private System.Threading.Thread mRenderthread3;
 
 		HittableList mScene = random_scene() ~ delete _;
 
@@ -63,20 +65,40 @@ namespace ComprendRay
 
 		public void StartNewRenderThread()
 		{
-			if (mRenderthread !== null)
+			if (mRenderthread1 !== null || mRenderthread2 !== null || mRenderthread3 !== null)
 			{
 				return;
 			}
-			void incremental_render_lambda()
+			void incremental_render_lambda1()
 			{
-				render_scene(ref mScene, ref mCam, ref mBuffer);
+				render_scene(ref mScene, ref mCam, ref mBuffer, 0);
 			}
-			// System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
-			System.Threading.ThreadStart incremental_render_call = new [&] => incremental_render_lambda;
+			System.Threading.ThreadStart incremental_render_call1 = new => incremental_render_lambda1;
 
-			mRenderthread = new System.Threading.Thread(incremental_render_call);
-			mRenderthread.SetName("IncrementalRenderThread");
-			mRenderthread.Start();
+			void incremental_render_lambda2()
+			{
+				render_scene(ref mScene, ref mCam, ref mBuffer, 1);
+			}
+			System.Threading.ThreadStart incremental_render_call2 = new => incremental_render_lambda2;
+
+			void incremental_render_lambda3()
+			{
+				render_scene(ref mScene, ref mCam, ref mBuffer, 2);
+			}
+			System.Threading.ThreadStart incremental_render_call3 = new => incremental_render_lambda3;
+
+
+			mRenderthread1 = new System.Threading.Thread(incremental_render_call1);
+			mRenderthread1.SetName("IncrementalRenderThread1");
+			mRenderthread1.Start();
+
+			mRenderthread2 = new System.Threading.Thread(incremental_render_call2);
+			mRenderthread2.SetName("IncrementalRenderThread2");
+			mRenderthread2.Start();
+
+			mRenderthread3 = new System.Threading.Thread(incremental_render_call3);
+			mRenderthread3.SetName("IncrementalRenderThread3");
+			mRenderthread3.Start();
 		}
 
 		public static void set_pixel(SDL.Surface* surface, int32 x, int32 y, uint32 pixel)
@@ -85,44 +107,29 @@ namespace ComprendRay
 			*target_pixel = pixel;
 		}
 
-		static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer)
+		static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer, int sample)
 		{
 			let render_params = buffer.renderparameters;
-			// var start_time = DateTime.Now; 
-
-			// Render
-
-			// var Stream = System.Console.Out;
-
 			var rand = scope Random();
-			for (int32 current_sample < render_params.samples_per_pixel)
+			int32 current_sample = (int32)sample;
+			for (int32 y < render_params.image_height)
 			{
-				for (int32 y < render_params.image_height)
+				for (int32 x < render_params.image_width)
 				{
-					// Stream.Write("\rScanlines remaining: {0,5}", j);
-					for (int32 x < render_params.image_width)
-					{
-						let u = (x + rand.NextDouble()) / (render_params.image_width - 1);
-						let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
-						var r = cam.get_ray(u, v);
-						buffer[x, y] = ray_color(ref r, world, render_params.max_depth);
-					}
-				}
-
-				// Stream.Write(scope $"\nDone. Render time: {DateTime.Now - start_time}\n");
-
-				let fileName = scope $"image_sample_{current_sample}.ppm";
-
-				let imageData = buffer.pixelbuffers[buffer.current_sample].to_ppm(buffer.renderparameters);
-				System.IO.File.WriteAllText(fileName, imageData);
-				delete imageData;
-
-				if (buffer.current_sample < render_params.samples_per_pixel - 1)
-				{
-					buffer.current_sample++;
+					let u = (x + rand.NextDouble()) / (render_params.image_width - 1);
+					let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
+					var r = cam.get_ray(u, v);
+					buffer.pixelbuffers[current_sample].pixels[x, y] = ray_color(ref r, world, render_params.max_depth);
 				}
 			}
 
+			let fileName = scope $"image_sample_{current_sample}.ppm";
+
+			let imageData = buffer.pixelbuffers[buffer.current_sample].to_ppm(buffer.renderparameters);
+			System.IO.File.WriteAllText(fileName, imageData);
+			delete imageData;
+
+			/*
 			let fileName = scope $"image_sample_composed.ppm";
 
 			let imageData = buffer.composed_buffer.to_ppm(buffer.renderparameters);
@@ -134,6 +141,7 @@ namespace ComprendRay
 			psi.SetFileName(fileName);
 			var process = scope System.Diagnostics.SpawnedProcess();
 			process.Start(psi);
+			*/
 		}
 
 		static Color ray_color(ref Ray r, Hittable world, int depth)
