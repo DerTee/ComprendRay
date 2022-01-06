@@ -1,5 +1,5 @@
 using System;
-using ComprendRay.Utils;
+using ComprendRay.Raytracer;
 
 namespace ComprendRay
 {
@@ -9,7 +9,7 @@ namespace ComprendRay
 		Point3 lower_left_corner;
 		Vec3 horizontal;
 		Vec3 vertical;
-		Vec3 u , v , w;
+		Vec3 u, v, w;
 		double lens_radius;
 
 		public this(Point3 lookfrom, Point3 lookat, Vec3 vup, double vfov, double aspect_ratio, double aperture, double focus_dist)
