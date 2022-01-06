@@ -4,11 +4,11 @@ namespace ComprendRay
 {
 	struct RenderParameters
 	{
-		public double aspect_ratio = 120 / 80;
-		public int32 image_width = 120; // 320;
-		public int32 image_height = 80; // 240;
-		public int32 samples_per_pixel = 5;
-		public int32 max_depth = 2;
+		public int32 image_width = 320;
+		public int32 image_height = 240;
+		public double aspect_ratio = image_width / image_height;
+		public int32 samples_per_pixel = 10;
+		public int32 max_depth = 30;
 
 		public enum ParameterError
 		{
