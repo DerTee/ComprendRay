@@ -67,12 +67,14 @@ namespace ComprendRay
 			pixels = new Color[width, height];
 		}
 
-		public String to_ppm(RenderParameters render_params)
+		public String to_ppm()
 		{
-			var imageData = new $"P3\n{render_params.image_width} {render_params.image_height}\n255\n";
-			for (var y = render_params.image_height - 1; y >= 0; y--)
+			let image_width = pixels.GetLength(0);
+			let image_height = pixels.GetLength(1);
+			var imageData = new $"P3\n{image_width} {image_height}\n255\n";
+			for (var y = image_height - 1; y >= 0; y--)
 			{
-				for (var x < render_params.image_width)
+				for (var x < image_width)
 				{
 					let pixel = pixels[x, y];
 					let (r, g, b) = (pixel.x, pixel.y, pixel.z);

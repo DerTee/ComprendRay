@@ -2,17 +2,15 @@ using SDL2;
 using System;
 using System.IO;
 using ComprendRay.Raytracer;
+using SDL2;
 
 namespace ComprendRay
 {
 	class RaytracerGUIApp : SDLApp
 	{
 		public String Title = new .("ComprendRay") ~ delete _;
-		/*private bool mIsRendering = false;*/
 		private RenderBuffer mBuffer ~ delete _;
-		private System.Threading.Thread mRenderthread1;
-		private System.Threading.Thread mRenderthread2;
-		private System.Threading.Thread mRenderthread3;
+		private RenderThreadPool mRenderThreadPool;
 
 		HittableList mScene = create_random_scene() ~ delete _;
 
@@ -24,7 +22,14 @@ namespace ComprendRay
 			20.0, // dist_to_focus
 			3 / 2, // aspect ratio
 			0.1, // aperture
-			10) ~ delete _;
+			10 // focus_dist
+			) ~ delete _;
+
+		public ~this()
+		{
+			// annoying to have to do this, but I don't want RenderThreadPool to be a class (which might be stupid)
+			mRenderThreadPool.Dispose();
+		}
 
 		public new void Init()
 		{
@@ -38,6 +43,8 @@ namespace ComprendRay
 
 			let rp = RenderParameters();
 			mBuffer = new RenderBuffer(rp);
+			// mRenderThreadPool.num_threads = 12;
+			mRenderThreadPool.NumThreads = (uint8)rp.samples_per_pixel;
 		}
 
 		public override void Draw()
@@ -47,7 +54,7 @@ namespace ComprendRay
 			let user_pressed_start_render = true;
 			if (user_pressed_start_render)
 			{
-				StartNewRenderThread();
+				StartRender();
 			}
 
 			// ToDo clean this mess up! this is a bug, because we can't rely mBuffer.current_sample, also we should not
@@ -63,42 +70,12 @@ namespace ComprendRay
 			}
 		}
 
-		public void StartNewRenderThread()
+		public void StartRender()
 		{
-			if (mRenderthread1 !== null || mRenderthread2 !== null || mRenderthread3 !== null)
+			if (!mRenderThreadPool.IsRunning())
 			{
-				return;
+				mRenderThreadPool.Start(ref mScene, ref mCam, ref mBuffer);
 			}
-			void incremental_render_lambda1()
-			{
-				render_scene(ref mScene, ref mCam, ref mBuffer, 0);
-			}
-			System.Threading.ThreadStart incremental_render_call1 = new => incremental_render_lambda1;
-
-			void incremental_render_lambda2()
-			{
-				render_scene(ref mScene, ref mCam, ref mBuffer, 1);
-			}
-			System.Threading.ThreadStart incremental_render_call2 = new => incremental_render_lambda2;
-
-			void incremental_render_lambda3()
-			{
-				render_scene(ref mScene, ref mCam, ref mBuffer, 2);
-			}
-			System.Threading.ThreadStart incremental_render_call3 = new => incremental_render_lambda3;
-
-
-			mRenderthread1 = new System.Threading.Thread(incremental_render_call1);
-			mRenderthread1.SetName("IncrementalRenderThread1");
-			mRenderthread1.Start();
-
-			mRenderthread2 = new System.Threading.Thread(incremental_render_call2);
-			mRenderthread2.SetName("IncrementalRenderThread2");
-			mRenderthread2.Start();
-
-			mRenderthread3 = new System.Threading.Thread(incremental_render_call3);
-			mRenderthread3.SetName("IncrementalRenderThread3");
-			mRenderthread3.Start();
 		}
 
 		public static void set_pixel(SDL.Surface* surface, int32 x, int32 y, uint32 pixel)

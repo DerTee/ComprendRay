@@ -26,25 +26,22 @@ namespace ComprendRay.Raytracer
 				}
 			}
 
-			let fileName = scope $"image_sample_{current_sample}.ppm";
+			write_image(scope $"image_sample_{current_sample}.ppm", buffer.pixelbuffers[buffer.current_sample]);
+		}
 
-			let imageData = buffer.pixelbuffers[buffer.current_sample].to_ppm(buffer.renderparameters);
+		public static void write_image(StringView fileName, PixelBuffer buffer)
+		{
+			let imageData = buffer.to_ppm();
 			System.IO.File.WriteAllText(fileName, imageData);
 			delete imageData;
+		}
 
-			/*
-			let fileName = scope $"image_sample_composed.ppm";
-
-			let imageData = buffer.composed_buffer.to_ppm(buffer.renderparameters);
-			System.IO.File.WriteAllText(fileName, imageData);
-			delete imageData;
-
-			// open finished composed image in system image viewer
+		public static void open_file_with_associated_app(StringView fileName)
+		{
 			var psi = scope System.Diagnostics.ProcessStartInfo();
 			psi.SetFileName(fileName);
 			var process = scope System.Diagnostics.SpawnedProcess();
 			process.Start(psi);
-			*/
 		}
 
 		public static Color ray_color(ref Ray r, Hittable world, int depth)
