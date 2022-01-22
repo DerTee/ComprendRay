@@ -11,8 +11,6 @@ namespace ComprendRay
 		public PixelBuffer composed_buffer;
 
 		public RenderParameters renderparameters;
-		public int32 current_sample = 0;
-		public Vec2Int current_pixel = .(0, 0);
 
 		public this(RenderParameters rp)
 		{
@@ -34,28 +32,6 @@ namespace ComprendRay
 			}
 			delete pixelbuffers;
 			delete composed_buffer.pixels;
-		}
-
-		public Color this[int x, int y]
-		{
-			[Inline] get
-			{
-				return pixelbuffers[current_sample].pixels[x, y];
-			}
-			[Inline] set
-			{
-				pixelbuffers[current_sample].pixels[x, y] = value;
-
-				// TODO this is a shitty, unexpected, implicit way to create the composed buffer, make it explicit and expected
-				let scale = 1.0 / current_sample;
-				var composed_pixel = Color();
-				for (let i < current_sample)
-				{
-					composed_pixel += scale * pixelbuffers[i].pixels[x, y];
-					// composed_pixel += Math.Sqrt(scale * pixelbuffers[i].pixels[x, y]);
-				}
-				composed_buffer.pixels[x, y] = composed_pixel;
-			}
 		}
 	}
 

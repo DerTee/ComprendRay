@@ -33,7 +33,7 @@ namespace ComprendRay.Raytracer
 				}
 			}
 
-			write_image(scope $"image_sample_{current_sample}.ppm", buffer.pixelbuffers[buffer.current_sample]);
+			write_image(scope $"image_sample_{current_sample}.ppm", buffer.pixelbuffers[current_sample]);
 		}
 
 		public static void write_image(StringView fileName, PixelBuffer buffer)

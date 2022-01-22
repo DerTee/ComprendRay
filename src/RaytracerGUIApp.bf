@@ -64,7 +64,7 @@ namespace ComprendRay
 				for (let y < mBuffer.renderparameters.image_height)
 				{
 					/*let last_finished_sample = 0;*/
-					let color = mBuffer[x, y];
+					let color = mBuffer.composed_buffer.pixels[x, y];
 					set_pixel(mScreen, x, y, Color.to_uint(color));
 				}
 			}
