@@ -14,7 +14,6 @@ namespace ComprendRay.Raytracer
 		{
 			let render_params = buffer.renderparameters;
 			var rand = scope Random();
-			int32 current_sample = (int32)sample;
 			for (int32 y < render_params.image_height)
 			{
 				for (int32 x < render_params.image_width)
@@ -23,7 +22,7 @@ namespace ComprendRay.Raytracer
 					let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
 					var r = cam.get_ray(u, v);
 					let pixel = ray_color(ref r, world, render_params.max_depth);
-					buffer.pixelbuffers[current_sample].pixels[x, y] = pixel;
+					buffer.pixelbuffers[sample].pixels[x, y] = pixel;
 
 					// ToDo This is a bit shit, because during rendering not all samples are done, so dividing by
 					// samples_per_pixel makes the image too dark in the beginning and that only improves with more
@@ -33,7 +32,7 @@ namespace ComprendRay.Raytracer
 				}
 			}
 
-			write_image(scope $"image_sample_{current_sample}.ppm", buffer.pixelbuffers[current_sample]);
+			write_image(scope $"image_sample_{sample}.ppm", buffer.pixelbuffers[sample]);
 		}
 
 		public static void write_image(StringView fileName, PixelBuffer buffer)
