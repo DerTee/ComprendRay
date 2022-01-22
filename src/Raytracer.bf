@@ -22,7 +22,14 @@ namespace ComprendRay.Raytracer
 					let u = (x + rand.NextDouble()) / (render_params.image_width - 1);
 					let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
 					var r = cam.get_ray(u, v);
-					buffer.pixelbuffers[current_sample].pixels[x, y] = ray_color(ref r, world, render_params.max_depth);
+					let pixel = ray_color(ref r, world, render_params.max_depth);
+					buffer.pixelbuffers[current_sample].pixels[x, y] = pixel;
+
+					// ToDo This is a bit shit, because during rendering not all samples are done, so dividing by
+					// samples_per_pixel makes the image too dark in the beginning and that only improves with more
+					// samples being done
+					// One solution would be to let all threads work on the same sample, so we always know where we are
+					buffer.composed_buffer.pixels[x, y] += pixel / render_params.samples_per_pixel;
 				}
 			}
 
