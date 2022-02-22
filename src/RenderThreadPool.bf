@@ -1,12 +1,17 @@
 using ComprendRay.Raytracer;
+using System;
+using System.Collections;
+using System.Threading;
+
 
 namespace ComprendRay
 {
 	struct RenderThreadPool
 	{
-		public System.Threading.Thread MonitoringThread;
-		public System.Collections.List<System.Threading.Thread> RenderThreads;
 		public uint8 NumThreads;
+		public Thread MonitoringThread;
+		public List<Thread> RenderThreads;
+		public List<Action> JobList;
 		public RenderBuffer RenderBuffer;
 
 		public bool IsRunning()
@@ -45,9 +50,9 @@ namespace ComprendRay
 				{
 					render_scene(ref world, ref cam, ref buffer, sample);
 				}
-				System.Threading.ThreadStart incremental_render = new => incremental_render_lambda;
+				ThreadStart incremental_render = new => incremental_render_lambda;
 
-				var Renderthread = new System.Threading.Thread(incremental_render);
+				var Renderthread = new Thread(incremental_render);
 				Renderthread.SetName(scope $"IncrementalRenderThread{i}");
 				Renderthread.Start(false);
 				RenderThreads.Add(Renderthread);
@@ -68,8 +73,8 @@ namespace ComprendRay
 				open_file_with_associated_app(fileName);
 			}
 
-			System.Threading.ThreadStart join_threads = new => join_threads_and_compose_final_image;
-			MonitoringThread = new System.Threading.Thread(join_threads);
+			ThreadStart join_threads = new => join_threads_and_compose_final_image;
+			MonitoringThread = new Thread(join_threads);
 			MonitoringThread.SetName("Monitoring RenderThreads");
 			MonitoringThread.Start();
 		}
