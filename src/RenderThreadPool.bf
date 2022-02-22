@@ -13,6 +13,7 @@ namespace ComprendRay
 		public List<Thread> RenderThreads;
 		public List<Action> JobList;
 		public RenderBuffer RenderBuffer;
+		public uint16 MaxStackSizeRenderThread = 256;
 
 		public bool IsRunning()
 		{
@@ -52,7 +53,7 @@ namespace ComprendRay
 				}
 				ThreadStart incremental_render = new => incremental_render_lambda;
 
-				var Renderthread = new Thread(incremental_render);
+				var Renderthread = new Thread(incremental_render, MaxStackSizeRenderThread);
 				Renderthread.SetName(scope $"IncrementalRenderThread{i}");
 				Renderthread.Start(false);
 				RenderThreads.Add(Renderthread);
