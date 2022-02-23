@@ -1,21 +1,23 @@
-using SDL2;
 using System;
 using System.IO;
+using raylib_beef;
+using raylib_beef.Types;
 using ComprendRay.Raytracer;
-using SDL2;
+
 
 namespace ComprendRay
 {
-	class RaytracerGUIApp : SDLApp
+	struct RaytracerGUIApp
 	{
-		public String Title = new .("ComprendRay") ~ delete _;
-		private RenderBuffer mBuffer ~ delete _;
+		public String Title = new .("ComprendRay");
+		private volatile RenderBuffer mBuffer;
 		private RenderThreadPool mRenderThreadPool;
+		private int32 screenwidth, screenheight;
 
-		HittableList mScene = create_random_scene() ~ delete _;
+		HittableList mScene = create_random_scene();
 
 		// Camera
-		Camera mCam = new .(
+		ComprendRay.Camera mCam = new .(
 			Point3(13, 2, 3), // lookfrom
 			Point3(0, 0, 0), // lookat
 			Vec3(0, 1, 0), // up vector
@@ -23,65 +25,78 @@ namespace ComprendRay
 			3 / 2, // aspect ratio
 			0.1, // aperture
 			10 // focus_dist
-			) ~ delete _;
+			);
 
-		public ~this()
+		public void Init() mut
 		{
-			// annoying to have to do this, but I don't want RenderThreadPool to be a class (which might be stupid)
-			mRenderThreadPool.Dispose();
-		}
-
-		public new void Init()
-		{
-			if (!SDL.VERSION_ATLEAST(2, 0, 9))
-			{
-				SDL.Version version = . { };
-				SDL.VERSION(out version);
-				System.Internal.FatalError(scope $"SDL version too low! Need at least SDL 2.0.9, found {version.major}.{version.minor}.{version.patch}!");
-			}
-			base.Init();
-
 			let rp = RenderParameters();
 			mBuffer = new RenderBuffer(rp);
 			// mRenderThreadPool.num_threads = 12;
 			mRenderThreadPool.NumThreads = (uint8)rp.samples_per_pixel;
+
+			screenwidth = 800;
+			screenheight = 600;
+			Raylib.InitWindow(screenwidth, screenheight, Title);
+			Raylib.SetTargetFPS(60);
 		}
 
-		public override void Draw()
+		public void Dispose()
 		{
-			// SDL.FillRect(mScreen, scope SDL.Rect(0, 0, 100, 100), 0xff0000);
+			// annoying to have to do this, but I don't want RenderThreadPool to be a class (which might be stupid)
+			mRenderThreadPool.Dispose();
+			delete mScene;
+			delete mCam;
+			delete mBuffer;
+			delete Title;
 
-			let user_pressed_start_render = true;
-			if (user_pressed_start_render)
-			{
-				StartRender();
-			}
+			Raylib.CloseWindow();
+		}
 
-			// ToDo clean this mess up! this is a bug, because we can't rely mBuffer.current_sample, also we should not
-			// check this internal state here
-			for (let x < mBuffer.renderparameters.image_width)
+		public void Run() mut
+		{
+			while (!Raylib.WindowShouldClose())
 			{
-				for (let y < mBuffer.renderparameters.image_height)
+				// SDL.FillRect(mScreen, scope SDL.Rect(0, 0, 100, 100), 0xff0000);
+
+				let user_pressed_start_render = true;
+				if (user_pressed_start_render)
 				{
-					/*let last_finished_sample = 0;*/
-					let color = mBuffer.composed_buffer.pixels[x, y];
-					set_pixel(mScreen, x, y, Color.to_uint(color));
+					StartRender();
+				}
+
+
+				Raylib.BeginDrawing();
+				defer Raylib.EndDrawing();
+				Raylib.ClearBackground(.BLACK);
+				// ToDo clean this mess up! this is a bug, because we can't rely mBuffer.current_sample, also we should not
+				// check this internal state here
+				for (let x < mBuffer.renderparameters.image_width)
+				{
+					for (let y < mBuffer.renderparameters.image_height)
+					{
+						/*let last_finished_sample = 0;*/
+						let col = mBuffer.composed_buffer.pixels[x, y];
+						let r = col.x;
+						let g = col.y;
+						let b = col.z;
+						let color = raylib_beef.Types.Color(
+							(uint8)(r * 256),
+							(uint8)(g * 256),
+							(uint8)(b * 256),
+							(uint8)256);
+						// set_pixel(mScreen, x, y, Color.to_uint(color));
+						Raylib.DrawPixel(x, y, color);
+					}
 				}
 			}
 		}
 
-		public void StartRender()
+		public void StartRender() mut
 		{
 			if (!mRenderThreadPool.IsRunning())
 			{
 				mRenderThreadPool.Start(ref mScene, ref mCam, ref mBuffer);
 			}
-		}
-
-		public static void set_pixel(SDL.Surface* surface, int32 x, int32 y, uint32 pixel)
-		{
-			uint32* target_pixel = (uint32*)((uint8*)(surface.pixels) + y * surface.pitch + x * 4);
-			*target_pixel = pixel;
 		}
 	}
 }

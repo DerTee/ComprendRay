@@ -7,6 +7,7 @@ namespace ComprendRay
 			let app = scope RaytracerGUIApp();
 			app.Init();
 			app.Run();
+			app.Dispose();
 		}
 	}
 }

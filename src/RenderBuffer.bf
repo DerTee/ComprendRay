@@ -55,9 +55,9 @@ namespace ComprendRay
 					let pixel = pixels[x, y];
 					let (r, g, b) = (pixel.x, pixel.y, pixel.z);
 					imageData.AppendF("\n{} {} {}",
-						(int)(256 * Math.Clamp(r, 0.0, 0.999)),
-						(int)(256 * Math.Clamp(g, 0.0, 0.999)),
-						(int)(256 * Math.Clamp(b, 0.0, 0.999))
+						(uint8)(256 * Math.Clamp(r, 0.0, 0.999)),
+						(uint8)(256 * Math.Clamp(g, 0.0, 0.999)),
+						(uint8)(256 * Math.Clamp(b, 0.0, 0.999))
 						);
 				}
 			}

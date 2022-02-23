@@ -1,5 +1,5 @@
 FileVersion = 1
-Projects = {ComprendRay = {Path = "."}, SDL2 = "*"}
+Projects = {ComprendRay = {Path = "."}, raylib-beef = "*"}
 
 [Workspace]
 StartupProject = "ComprendRay"
