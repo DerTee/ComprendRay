@@ -10,7 +10,7 @@ namespace ComprendRay.Raytracer
 			return degrees * Math.PI_d / 180;
 		}
 
-		public static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer, int sample)
+		public static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer, uint16 sample)
 		{
 			let render_params = buffer.renderparameters;
 			var rand = scope Random();
@@ -32,14 +32,107 @@ namespace ComprendRay.Raytracer
 				}
 			}
 
-			write_image(scope $"image_sample_{sample}.ppm", buffer.pixelbuffers[sample]);
+			// write_image(scope $"image_sample_{sample}.ppm", buffer.pixelbuffers[sample]);
 		}
 
 		public static void write_image(StringView fileName, PixelBuffer buffer)
 		{
-			let imageData = buffer.to_ppm();
+			write_image_tga(fileName, buffer);
+		}
+
+		public static void write_image_ppm(StringView fileName, PixelBuffer buffer)
+		{
+			var pixels = buffer.pixels;
+
+			let image_width = pixels.GetLength(0);
+			let image_height = pixels.GetLength(1);
+			var imageData = new $"P3\n{image_width} {image_height}\n255\n";
+			for (var y = image_height - 1; y >= 0; y--)
+			{
+				for (var x < image_width)
+				{
+					let pixel = pixels[x, y];
+					let (r, g, b) = (pixel.x, pixel.y, pixel.z);
+					imageData.AppendF("\n{} {} {}",
+						(uint8)(256 * Math.Clamp(r, 0.0, 0.999)),
+						(uint8)(256 * Math.Clamp(g, 0.0, 0.999)),
+						(uint8)(256 * Math.Clamp(b, 0.0, 0.999))
+						);
+				}
+			}
+
 			System.IO.File.WriteAllText(fileName, imageData);
 			delete imageData;
+		}
+
+		public static void write_image_tga(StringView fileName, PixelBuffer buffer)
+		{
+			var pixels = buffer.pixels;
+
+			let image_width = (uint16)pixels.GetLength(0);
+			let image_height = (uint16)pixels.GetLength(1);
+
+			// see https://en.wikipedia.org/wiki/Truevision_TGA#Header or https://www.gamers.org/dEngine/quake3/TGA.txt
+			let tga_header_size = 18;
+			let color_depth_in_byte = 3;
+			// uint32 size_in_bytes = (uint32)(tga_header_size + (image_width * image_height * color_depth_in_byte));
+			uint32 size_in_bytes = (uint32)tga_header_size + 1 + (uint32)image_width * image_height * color_depth_in_byte;
+			// expecting 921 618
+
+			var imageData = new uint8[size_in_bytes];
+			defer delete imageData;
+			imageData[0] = 0; // Length of the image ID field
+			imageData[1] = 0; // Color map type: 0 if image file contains no color map
+			imageData[2] = 2; // Image type: 2 uncompressed true-color image
+
+			// 5 bytes Color map specification
+			imageData[3] = 0;
+			imageData[4] = 0;
+			imageData[5] = 0;
+			imageData[6] = 0;
+			imageData[7] = 0;
+
+			// 10 bytes Image specification
+
+			// X-origin (2 bytes): absolute coordinate of lower-left corner for displays where origin is at the lower left
+			imageData[8] = 0;
+			imageData[9] = 0;
+
+			// Y-origin (2 bytes lo-hi): as for X-origin
+			// imageData[10] = (uint8)(image_height & 0x00ff);
+			// imageData[11] = (uint8)(image_height >> 8);
+			imageData[10] = 0;
+			imageData[11] = 0;
+
+			// Image width (2 bytes lo-hi): width in pixels
+			imageData[12] = (uint8)(image_width & 0x00ff);
+			imageData[13] = (uint8)(image_width >> 8);
+
+			// Height of Image (2 bytes lo-hi)
+			imageData[14] = (uint8)(image_height & 0x00ff);
+			imageData[15] = (uint8)(image_height >> 8);
+
+			imageData[16] = 24; // Pixel depth (1 byte): bits per pixel
+			imageData[17] = 0; // Image Descriptor Byte. This entire byte should be set to 0.  Don't ask me.
+			imageData[18] = 0; // Image Identification Field. It's usually omitted ( length in byte 1 = 0 ), but can be up to 255 characters.
+
+			uint32 cursor = 19; // start RGB data after the header bytes
+			// for (var y = image_height - 1; y >= 0; y--)
+			for (var y < image_height)
+			{
+				for (var x < image_width)
+				{
+					let pixel = pixels[x, y];
+					let (r, g, b) = (pixel.x, pixel.y, pixel.z);
+
+					// seems like TGA needs colors in the order green, red, blue. no idea why.
+					imageData[cursor] = (uint8)(256 * Math.Clamp(g, 0.0, 0.999));
+					imageData[cursor + 1] = (uint8)(256 * Math.Clamp(r, 0.0, 0.999));
+					imageData[cursor + 2] = (uint8)(256 * Math.Clamp(b, 0.0, 0.999));
+					cursor += 3;
+				}
+			}
+			System.IO.File.WriteAll(fileName, imageData);
 		}
 
 		public static void open_file_with_associated_app(StringView fileName)
@@ -50,6 +143,8 @@ namespace ComprendRay.Raytracer
 			process.Start(psi);
 		}
 
+		// HOT FUNCTION!!
+		// recursive function, maybe rewrite as a loop for either performance testing or
 		public static Color ray_color(ref Ray r, Hittable world, int depth)
 		{
 			var rec = hit_record();

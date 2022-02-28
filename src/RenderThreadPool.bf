@@ -69,7 +69,7 @@ namespace ComprendRay
 
 				// ToDo this is shit, writing the image should not come from here, use a delegate later on
 				// final image
-				let fileName = scope $"image_final.ppm";
+				let fileName = scope $"image_final.tga";
 				write_image(fileName, buffer.composed_buffer);
 				open_file_with_associated_app(fileName);
 			}

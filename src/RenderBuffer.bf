@@ -42,26 +42,5 @@ namespace ComprendRay
 		{
 			pixels = new Color[width, height];
 		}
-
-		public String to_ppm()
-		{
-			let image_width = pixels.GetLength(0);
-			let image_height = pixels.GetLength(1);
-			var imageData = new $"P3\n{image_width} {image_height}\n255\n";
-			for (var y = image_height - 1; y >= 0; y--)
-			{
-				for (var x < image_width)
-				{
-					let pixel = pixels[x, y];
-					let (r, g, b) = (pixel.x, pixel.y, pixel.z);
-					imageData.AppendF("\n{} {} {}",
-						(uint8)(256 * Math.Clamp(r, 0.0, 0.999)),
-						(uint8)(256 * Math.Clamp(g, 0.0, 0.999)),
-						(uint8)(256 * Math.Clamp(b, 0.0, 0.999))
-						);
-				}
-			}
-			return imageData;
-		}
 	}
 }
