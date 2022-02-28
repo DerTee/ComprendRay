@@ -37,7 +37,7 @@ namespace ComprendRay
 			screenwidth = 800;
 			screenheight = 600;
 			Raylib.InitWindow(screenwidth, screenheight, Title);
-			Raylib.SetTargetFPS(60);
+			Raylib.SetTargetFPS(30);
 		}
 
 		public void Dispose()
@@ -58,35 +58,58 @@ namespace ComprendRay
 			{
 				// SDL.FillRect(mScreen, scope SDL.Rect(0, 0, 100, 100), 0xff0000);
 
-				let user_pressed_start_render = true;
+				let user_pressed_start_render = Raylib.IsKeyDown(.KEY_ENTER);
 				if (user_pressed_start_render)
 				{
 					StartRender();
 				}
 
+				let user_pressed_pause_render = Raylib.IsKeyDown(.KEY_SPACE);
+				if (user_pressed_pause_render)
+				{
+					TogglePauseRender();
+				}
+
 
 				Raylib.BeginDrawing();
 				defer Raylib.EndDrawing();
-				Raylib.ClearBackground(.BLACK);
-				// ToDo clean this mess up! this is a bug, because we can't rely mBuffer.current_sample, also we should not
-				// check this internal state here
+				Raylib.ClearBackground(.RAYWHITE);
+
 				for (let x < mBuffer.renderparameters.image_width)
 				{
 					for (let y < mBuffer.renderparameters.image_height)
 					{
 						/*let last_finished_sample = 0;*/
 						let col = mBuffer.composed_buffer.pixels[x, y];
-						let r = col.x;
-						let g = col.y;
-						let b = col.z;
+						let (r, g, b) = (col.x, col.y, col.z);
 						let color = raylib_beef.Types.Color(
-							(uint8)(r * 256),
-							(uint8)(g * 256),
-							(uint8)(b * 256),
-							(uint8)256);
-						// set_pixel(mScreen, x, y, Color.to_uint(color));
-						Raylib.DrawPixel(x, y, color);
+							(uint8)(r * 255),
+							(uint8)(g * 255),
+							(uint8)(b * 255),
+							(uint8)255);
+
+						// in raylib y = 0 is topmost pixel, in the raytracer it's the bottom pixel -> needs flip
+						let y_flipped = mBuffer.renderparameters.image_height - y;
+						Raylib.DrawPixel(x, y_flipped, color);
 					}
+				}
+
+				if (mRenderThreadPool.MonitoringThread != null)
+				{
+					let monitoring_threadstate = mRenderThreadPool.MonitoringThread.ThreadState;
+					String state;
+					switch (monitoring_threadstate) {
+					case .Unstarted: state = "Unstarted";
+					case .Suspended: state = "Suspended";
+					case .SuspendRequested: state = "SuspendRequested";
+					case .Running: state = "Running";
+					case .Aborted: state = "Aborted";
+					case .Background: state = "Background";
+					default: state = "not exhaustive";
+					}
+					Raylib.DrawText(scope $"Number of RenderThreads: {mRenderThreadPool.RenderThreads.Count}, State of Monitoringthread: {monitoring_threadstate}",
+						10, screenheight - 50, 12, .BLUE
+						);
 				}
 			}
 		}
@@ -96,6 +119,14 @@ namespace ComprendRay
 			if (!mRenderThreadPool.IsRunning())
 			{
 				mRenderThreadPool.Start(ref mScene, ref mCam, ref mBuffer);
+			}
+		}
+
+		public void TogglePauseRender() mut
+		{
+			if (mRenderThreadPool.IsRunning())
+			{
+				mRenderThreadPool.TogglePause();
 			}
 		}
 	}

@@ -77,13 +77,57 @@ namespace ComprendRay
 			ThreadStart join_threads = new => join_threads_and_compose_final_image;
 			MonitoringThread = new Thread(join_threads);
 			MonitoringThread.SetName("Monitoring RenderThreads");
-			MonitoringThread.Start();
+			MonitoringThread.Start(false);
 		}
 
 		public void Dispose()
 		{
-			MonitoringThread.Join();
-			if (RenderThreads != null) delete RenderThreads;
+			if (MonitoringThread != null)
+			{
+				// MonitoringThread.Join();
+				delete MonitoringThread;
+			}
+			if (RenderThreads != null)
+			{
+				/*
+				for (let thread in RenderThreads)
+				{
+					if (thread != null)
+					{
+						// thread.Join();
+						delete thread;
+					}
+				}
+				*/
+				delete RenderThreads;
+			}
+		}
+
+		public void TogglePause()
+		{
+			switch (MonitoringThread.ThreadState) {
+			case .Running: Pause();
+			case .Suspended | .SuspendRequested: UnPause();
+			default:
+			}
+		}
+
+		public void Pause()
+		{
+			for (let thread in RenderThreads)
+			{
+				thread.Suspend();
+			}
+			MonitoringThread.Suspend();
+		}
+
+		public void UnPause()
+		{
+			for (let thread in RenderThreads)
+			{
+				thread.Resume();
+			}
+			MonitoringThread.Resume();
 		}
 	}
 }
