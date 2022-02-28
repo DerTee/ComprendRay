@@ -3,5 +3,11 @@ Dependencies = {corlib = "*", raylib-beef = "*"}
 
 [Project]
 Name = "ComprendRay"
-TargetType = "BeefGUIApplication"
 StartupObject = "ComprendRay"
+
+[Configs.Release.Win64]
+StackSize = 4096
+OptimizationLevel = "O2"
+LTOType = "Thin"
+VectorizeLoops = true
+VectorizeSLP = true
