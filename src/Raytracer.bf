@@ -14,6 +14,7 @@ namespace ComprendRay.Raytracer
 		{
 			let render_params = buffer.renderparameters;
 			var rand = scope Random();
+			let pixels = buffer.pixelbuffers[sample].pixels;
 			for (int32 y < render_params.image_height)
 			{
 				for (int32 x < render_params.image_width)
@@ -22,9 +23,9 @@ namespace ComprendRay.Raytracer
 					let v = (y + rand.NextDouble()) / (render_params.image_height - 1);
 					var r = cam.get_ray(u, v);
 					let pixel = ray_color(ref r, world, render_params.max_depth);
-					buffer.pixelbuffers[sample].pixels[x, y] = pixel;
+					pixels[x, y] = pixel;
 
-					// ToDo This is a bit shit, because during rendering not all samples are done, so dividing by
+					// ToDo This is shitty UX, because during rendering not all samples are done, so dividing by
 					// samples_per_pixel makes the image too dark in the beginning and that only improves with more
 					// samples being done
 					// One solution would be to let all threads work on the same sample, so we always know where we are
@@ -32,7 +33,7 @@ namespace ComprendRay.Raytracer
 				}
 			}
 
-			// write_image(scope $"image_sample_{sample}.ppm", buffer.pixelbuffers[sample]);
+			// write_image(scope $"image_sample_{sample}.tga", buffer.pixelbuffers[sample]);
 		}
 
 		public static void write_image(StringView fileName, PixelBuffer buffer)
@@ -99,8 +100,7 @@ namespace ComprendRay.Raytracer
 			imageData[9] = 0;
 
 			// Y-origin (2 bytes lo-hi): as for X-origin
-			// imageData[10] = (uint8)(image_height & 0x00ff);
-			// imageData[11] = (uint8)(image_height >> 8);
+			// note(DerTee): no idea why, but seems completely irrelevant
 			imageData[10] = 0;
 			imageData[11] = 0;
 
