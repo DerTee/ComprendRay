@@ -35,7 +35,6 @@ namespace ComprendRay
 				RenderThreads.Clear();
 				for (let i < buffer.composed_buffer.pixels.Count) buffer.composed_buffer.pixels[i] = .();
 			}
-			RenderBuffer = buffer;
 
 			for (let i < NumThreads)
 			{
@@ -106,10 +105,11 @@ namespace ComprendRay
 
 		public void TogglePause()
 		{
+			// ToDo Bug threadstate is always .Running, even when suspend was called before. maybe suspend only works properly if there's a yield??? although, pausing clearly works, because the render does not continue after hitting pause. resuming is what does not worl.
 			switch (MonitoringThread.ThreadState) {
 			case .Running: Pause();
 			case .Suspended | .SuspendRequested: UnPause();
-			default:
+			default: break;
 			}
 		}
 
