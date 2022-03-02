@@ -69,9 +69,9 @@ namespace ComprendRay
 
 				// ToDo this is shit, writing the image should not come from here, use a delegate later on
 				// final image
-				let fileName = scope $"image_final.tga";
-				write_image(fileName, buffer.composed_buffer);
-				open_file_with_associated_app(fileName);
+				// let fileName = scope $"image_final.tga";
+				// write_image(fileName, buffer.composed_buffer);
+				// open_file_with_associated_app(fileName);
 			}
 
 			ThreadStart join_threads = new => join_threads_and_compose_final_image;

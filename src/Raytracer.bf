@@ -25,6 +25,21 @@ namespace ComprendRay.Raytracer
 					let pixel = ray_color(ref r, world, render_params.max_depth);
 					pixels[x, y] = pixel;
 
+					// DeBUGGING:
+					dbgpixelstuff:
+					{
+						if (x > 10 && pixel != Color(0, 0, 0))
+						{
+							let prev_pixel = pixels[x - 1, y];
+							let prev2_pixel = pixels[x - 1, y];
+							if (prev_pixel == pixel && prev2_pixel == pixel)
+							{
+								System.Diagnostics.Debug.SafeBreak();
+							}
+						}
+					}
+
+
 					// ToDo This is shitty UX, because during rendering not all samples are done, so dividing by
 					// samples_per_pixel makes the image too dark in the beginning and that only improves with more
 					// samples being done
