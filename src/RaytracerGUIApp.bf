@@ -13,23 +13,26 @@ namespace ComprendRay
 		private volatile RenderBuffer mBuffer;
 		private RenderThreadPool mRenderThreadPool;
 		private int32 screenwidth, screenheight;
+		private uint16 displayedBufferIndex; // the rendered buffer currently shown, 0 = composed buffer, rest are samples + 1
 
-		HittableList mScene = create_random_scene();
+		HittableList mScene;
 
 		// Camera
-		ComprendRay.Camera mCam = new .(
-			Point3(13, 2, 3), // lookfrom
-			Point3(0, 0, 0), // lookat
-			Vec3(0, 1, 0), // up vector
-			20.0, // dist_to_focus
-			3 / 2, // aspect ratio
-			0.1, // aperture
-			10 // focus_dist
-			);
+		ComprendRay.Camera mCam;
 
 		public void Init() mut
 		{
+			mScene = create_random_scene();
 			let rp = RenderParameters();
+			mCam = new .(
+				Point3(13, 2, 3), // lookfrom
+				Point3(0, 0, 0), // lookat
+				Vec3(0, 1, 0), // up vector
+				20.0, // dist_to_focus
+				rp.aspect_ratio, // aspect ratio
+				0.1, // aperture
+				10 // focus_dist
+				);
 			mBuffer = new RenderBuffer(rp);
 			// mRenderThreadPool.num_threads = 12;
 			mRenderThreadPool.NumThreads = (uint8)rp.samples_per_pixel;
@@ -56,20 +59,38 @@ namespace ComprendRay
 		{
 			while (!Raylib.WindowShouldClose())
 			{
-				// SDL.FillRect(mScreen, scope SDL.Rect(0, 0, 100, 100), 0xff0000);
+				let pressed_start_render = Raylib.IsKeyReleased(.KEY_ENTER);
+				let pressed_pause_render = Raylib.IsKeyReleased(.KEY_SPACE);
+				let pressed_next_sample_image = Raylib.IsKeyReleased(.KEY_RIGHT);
+				let pressed_previous_sample_image = Raylib.IsKeyReleased(.KEY_LEFT);
+				let pressed_new_scene = Raylib.IsKeyReleased(.KEY_N);
 
-				let user_pressed_start_render = Raylib.IsKeyDown(.KEY_ENTER);
-				if (user_pressed_start_render)
+
+				if (pressed_start_render) StartRender();
+				if (pressed_pause_render) TogglePauseRender();
+				if (pressed_next_sample_image)
 				{
-					StartRender();
+					if (displayedBufferIndex >= mBuffer.renderparameters.samples_per_pixel)
+						displayedBufferIndex = 0;
+					else
+						displayedBufferIndex += 1;
+				}
+				if (pressed_previous_sample_image)
+				{
+					if (displayedBufferIndex == 0)
+						displayedBufferIndex = mBuffer.renderparameters.samples_per_pixel;
+					else
+						displayedBufferIndex -= 1;
+				}
+				if (pressed_new_scene)
+				{
+					delete mScene;
+					mScene = create_random_scene();
 				}
 
-				let user_pressed_pause_render = Raylib.IsKeyDown(.KEY_SPACE);
-				if (user_pressed_pause_render)
-				{
-					TogglePauseRender();
-				}
-
+				PixelBuffer displayBuffer;
+				if (displayedBufferIndex == 0) displayBuffer = mBuffer.composed_buffer;
+				else displayBuffer = mBuffer.pixelbuffers[displayedBufferIndex - 1];
 
 				Raylib.BeginDrawing();
 				defer Raylib.EndDrawing();
@@ -80,7 +101,7 @@ namespace ComprendRay
 					for (let y < mBuffer.renderparameters.image_height)
 					{
 						/*let last_finished_sample = 0;*/
-						let col = mBuffer.composed_buffer.pixels[x, y];
+						let col = displayBuffer.pixels[x, y];
 						let (r, g, b) = (col.x, col.y, col.z);
 						let color = raylib_beef.Types.Color(
 							(uint8)(r * 255),
@@ -116,18 +137,15 @@ namespace ComprendRay
 
 		public void StartRender() mut
 		{
-			if (!mRenderThreadPool.IsRunning())
-			{
-				mRenderThreadPool.Start(ref mScene, ref mCam, ref mBuffer);
-			}
+			// if (!mRenderThreadPool.IsRunning())
+			// {
+			mRenderThreadPool.Start(ref mScene, ref mCam, ref mBuffer);
+			// }
 		}
 
 		public void TogglePauseRender() mut
 		{
-			if (mRenderThreadPool.IsRunning())
-			{
-				mRenderThreadPool.TogglePause();
-			}
+			mRenderThreadPool.TogglePause();
 		}
 	}
 }

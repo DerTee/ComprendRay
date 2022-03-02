@@ -170,7 +170,7 @@ namespace ComprendRay.Raytracer
 		public static HittableList create_random_scene(int seed = 0)
 		{
 			let world = new HittableList();
-			let rand = scope Random(seed);
+			let rand = scope Random();
 
 			var material_ground = new Lambertian(Color(0.8, 0.8, 0.0));
 			world.add(new Sphere(Point3(0, -1000, 0), 1000, material_ground));
