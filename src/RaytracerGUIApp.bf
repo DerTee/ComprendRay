@@ -59,13 +59,17 @@ namespace ComprendRay
 		{
 			while (!Raylib.WindowShouldClose())
 			{
+				// get all input
 				let pressed_start_render = Raylib.IsKeyReleased(.KEY_ENTER);
 				let pressed_pause_render = Raylib.IsKeyReleased(.KEY_SPACE);
 				let pressed_next_sample_image = Raylib.IsKeyReleased(.KEY_RIGHT);
 				let pressed_previous_sample_image = Raylib.IsKeyReleased(.KEY_LEFT);
 				let pressed_new_scene = Raylib.IsKeyReleased(.KEY_N);
+				let mouse_pos = (Raylib.GetMouseX(), Raylib.GetMouseY());
+				let has_focused_pixel = mouse_pos.0 < mBuffer.renderparameters.image_width && mouse_pos.1 < mBuffer.renderparameters.image_height;
 
 
+				// do logic
 				if (pressed_start_render) StartRender();
 				if (pressed_pause_render) TogglePauseRender();
 				if (pressed_next_sample_image)
@@ -92,6 +96,14 @@ namespace ComprendRay
 				if (displayedBufferIndex == 0) displayBuffer = mBuffer.composed_buffer;
 				else displayBuffer = mBuffer.pixelbuffers[displayedBufferIndex - 1];
 
+				ComprendRay.Color focused_pixel = .();
+				if (has_focused_pixel)
+				{
+					// in raylib y = 0 is topmost pixel, in the raytracer it's the bottom pixel -> needs flip
+					let y_flipped = mBuffer.renderparameters.image_height - mouse_pos.1;
+					focused_pixel = displayBuffer.pixels[mouse_pos.0, y_flipped];
+				}
+
 				Raylib.BeginDrawing();
 				defer Raylib.EndDrawing();
 				Raylib.ClearBackground(.RAYWHITE);
@@ -112,6 +124,20 @@ namespace ComprendRay
 						// in raylib y = 0 is topmost pixel, in the raytracer it's the bottom pixel -> needs flip
 						let y_flipped = mBuffer.renderparameters.image_height - y;
 						Raylib.DrawPixel(x, y_flipped, color);
+					}
+				}
+
+				// if (has_focused_pixel)
+				if (true)
+				{
+					let block_y = Math.Max(0, screenheight - 150);
+					let block_x = Math.Max(0, screenwidth - 150);
+					Raylib.DrawText(scope $"X {mouse_pos.0} Y {mouse_pos.1}", block_x, block_y, 10, .BLUE);
+					if (has_focused_pixel)
+					{
+						Raylib.DrawText(scope $"R {focused_pixel[0]}", block_x, block_y + 14, 12, .BLUE);
+						Raylib.DrawText(scope $"G {focused_pixel[1]}", block_x, block_y + 14 * 2, 12, .BLUE);
+						Raylib.DrawText(scope $"B {focused_pixel[2]}", block_x, block_y + 14 * 3, 12, .BLUE);
 					}
 				}
 
