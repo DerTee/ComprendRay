@@ -33,6 +33,7 @@ namespace ComprendRay
 			} else
 			{
 				RenderThreads.Clear();
+				delete MonitoringThread;
 				for (let i < buffer.composed_buffer.pixels.Count) buffer.composed_buffer.pixels[i] = .();
 			}
 
