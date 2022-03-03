@@ -37,6 +37,7 @@ namespace ComprendRay
 				for (let i < buffer.composed_buffer.pixels.Count) buffer.composed_buffer.pixels[i] = .();
 			}
 
+			NumThreads = (uint8)buffer.renderparameters.samples_per_pixel;
 			for (let i < NumThreads)
 			{
 				// ToDo: this is not correct, it's just a temporary hack!

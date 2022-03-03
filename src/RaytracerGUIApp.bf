@@ -12,6 +12,10 @@ namespace ComprendRay
 		public String Title = new .("ComprendRay");
 		private volatile RenderBuffer mBuffer;
 		private RenderThreadPool mRenderThreadPool;
+
+		// these are the current render params, that might be changed during rendering, but they will only be used on next render. the current buffer has its own copy of the original params it was started with
+		private RenderParameters mRenderParameters;
+
 		private int32 screenwidth, screenheight;
 		private uint16 displayedBufferIndex; // the rendered buffer currently shown, 0 = composed buffer, rest are samples + 1
 
@@ -23,19 +27,17 @@ namespace ComprendRay
 		public void Init() mut
 		{
 			mScene = create_random_scene();
-			let rp = RenderParameters();
+			mRenderParameters = RenderParameters();
 			mCam = new .(
 				Point3(13, 2, 3), // lookfrom
 				Point3(0, 0, 0), // lookat
 				Vec3(0, 1, 0), // up vector
 				20.0, // dist_to_focus
-				rp.aspect_ratio, // aspect ratio
+				mRenderParameters.aspect_ratio, // aspect ratio
 				0.1, // aperture
 				10 // focus_dist
 				);
-			mBuffer = new RenderBuffer(rp);
-			// mRenderThreadPool.num_threads = 12;
-			mRenderThreadPool.NumThreads = (uint8)rp.samples_per_pixel;
+			mBuffer = new RenderBuffer(mRenderParameters);
 
 			screenwidth = 800;
 			screenheight = 600;
@@ -65,8 +67,11 @@ namespace ComprendRay
 				let pressed_next_sample_image = Raylib.IsKeyReleased(.KEY_RIGHT);
 				let pressed_previous_sample_image = Raylib.IsKeyReleased(.KEY_LEFT);
 				let pressed_new_scene = Raylib.IsKeyReleased(.KEY_N);
+				let pressed_increase_samples = Raylib.IsKeyReleased(.KEY_UP);
+				let pressed_decrease_samples = Raylib.IsKeyReleased(.KEY_DOWN);
+
 				let mouse_pos = (Raylib.GetMouseX(), Raylib.GetMouseY());
-				let has_focused_pixel = mouse_pos.0 < mBuffer.renderparameters.image_width && mouse_pos.1 < mBuffer.renderparameters.image_height;
+				let has_focused_pixel = mouse_pos.0 < mRenderParameters.image_width && mouse_pos.1 < mRenderParameters.image_height;
 
 
 				// do logic
@@ -91,6 +96,8 @@ namespace ComprendRay
 					delete mScene;
 					mScene = create_random_scene();
 				}
+				if (pressed_increase_samples) mRenderParameters.samples_per_pixel = (uint16)Math.Min(11, mRenderParameters.samples_per_pixel + 1);
+				if (pressed_decrease_samples) mRenderParameters.samples_per_pixel = (uint16)Math.Max(1, mRenderParameters.samples_per_pixel - 1);
 
 				PixelBuffer displayBuffer;
 				if (displayedBufferIndex == 0) displayBuffer = mBuffer.composed_buffer;
@@ -165,6 +172,8 @@ namespace ComprendRay
 		{
 			// if (!mRenderThreadPool.IsRunning())
 			// {
+			if (mBuffer != null) delete mBuffer;
+			mBuffer = new RenderBuffer(mRenderParameters);
 			mRenderThreadPool.Start(ref mScene, ref mCam, ref mBuffer);
 			// }
 		}
