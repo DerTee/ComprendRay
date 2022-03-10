@@ -13,7 +13,7 @@ namespace ComprendRay.Raytracer
 		public static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer, uint16 sample)
 		{
 			let render_params = buffer.renderparameters;
-			var rand = scope Random();
+			var rand = prng_beef.Xoroshiro128Plus();
 			let pixels = buffer.pixelbuffers[sample].pixels;
 			for (int32 y < render_params.image_height)
 			{
@@ -170,7 +170,7 @@ namespace ComprendRay.Raytracer
 		public static HittableList create_random_scene(int seed = 0)
 		{
 			let world = new HittableList();
-			let rand = scope Random(seed);
+			var rand = prng_beef.Xoroshiro128Plus((uint64)seed);
 
 			var material_ground = new Lambertian(Color(0.8, 0.8, 0.0));
 			world.add(new Sphere(Point3(0, -1000, 0), 1000, material_ground));

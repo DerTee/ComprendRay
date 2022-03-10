@@ -50,7 +50,7 @@ namespace ComprendRay
 	class Dielectric : Material
 	{
 		public double ref_idx;
-		private static Random rand = new Random() ~ delete _;
+		private static prng_beef.Xoroshiro128Plus rand = prng_beef.Xoroshiro128Plus();
 
 		public this(double i)
 		{

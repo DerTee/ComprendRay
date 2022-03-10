@@ -1,11 +1,12 @@
 using System;
+using prng_beef;
 
 namespace ComprendRay
 {
 	struct Vec3
 	{
 		public double[3] e;
-		private static Random rand = new Random() ~ delete _;
+		private static Xoroshiro128Plus rand = Xoroshiro128Plus((uint64)System.Platform.BfpSystem_GetTimeStamp());
 
 		public this()
 		{
@@ -15,7 +16,7 @@ namespace ComprendRay
 		public this(double e0, double e1, double e2)
 		{
 			e = .(e0, e1, e2);
-		} 
+		}
 
 		// override for [] operator seems to work differently than the others
 		// found help here: https://www.reddit.com/r/beeflang/comments/ihibt2/how_do_i_overload_the_operator/g30d73b
@@ -38,7 +39,7 @@ namespace ComprendRay
 		{
 			let range = max - min;
 			return Vec3(rand.NextDouble() * range + min, rand.NextDouble() * range + min, rand.NextDouble() * range + min);
-		} 
+		}
 
 		// diffuse scatter method for fake Lambertian shading using ray within unit sphere
 		// not used anymore, it's a faster but uglier version of random_unit_vector
@@ -47,12 +48,12 @@ namespace ComprendRay
 		{
 			while (true)
 			{
-				let p = random(); 
+				let p = random();
 				// keep trying if not within unit sphere but in unit cube
 				if (p.length_squared() >= 1) continue;
 				return p;
 			}
-		} 
+		}
 
 		// diffuse scatter method Lambertian shading
 		// uses ray
@@ -62,7 +63,7 @@ namespace ComprendRay
 			let z = rand.NextDoubleSigned(); // -1 to +1
 			let r = Math.Sqrt(1 - z * z); // radius
 			return Vec3(r * Math.Cos(a), r * Math.Sin(a), z);
-		} 
+		}
 
 		// diffuse scatter method of old times before adopting Lambertian
 		public static Vec3 random_in_hemisphere(Vec3 normal)
@@ -95,7 +96,7 @@ namespace ComprendRay
 			let r_out_perp = etai_over_etat * (uv + cos_theta * n);
 			let r_out_parallel = -1 * Math.Sqrt(Math.Abs(1.0 - r_out_perp.length_squared())) * n;
 			return r_out_perp + r_out_parallel;
-		} 
+		}
 
 		/// pack float color values from 0 - 1 into 32 bits, (RED 1.byte, GREEN 2.byte, BLUE 3.byte, ALPHA 4.byte)
 		public static uint32 to_uint(Color col)
@@ -107,7 +108,7 @@ namespace ComprendRay
 		}
 
 		[Inline]
-		public void operator+=(Vec3 rhs) mut
+		public void operator +=(Vec3 rhs) mut
 		{
 			e[0] += rhs.e[0];
 			e[1] += rhs.e[1];
@@ -115,7 +116,7 @@ namespace ComprendRay
 		}
 
 		[Inline]
-		public void operator-=(Vec3 rhs) mut
+		public void operator -=(Vec3 rhs) mut
 		{
 			e[0] -= rhs.e[0];
 			e[1] -= rhs.e[1];
@@ -123,7 +124,7 @@ namespace ComprendRay
 		}
 
 		[Inline]
-		public void operator*=(double t) mut
+		public void operator *=(double t) mut
 		{
 			e[0] *= t;
 			e[1] *= t;
@@ -131,8 +132,8 @@ namespace ComprendRay
 		}
 
 		[Inline]
-		public void operator/=(double t) mut
-		{ 
+		public void operator /=(double t) mut
+		{
 			// would like to do the following, but it doesn't work
 			// this *= 1/t;
 			e[0] /= t;
@@ -177,37 +178,37 @@ namespace ComprendRay
 		}
 
 		[Inline]
-		public static Vec3 operator+(Vec3 lhs, Vec3 rhs)
+		public static Vec3 operator +(Vec3 lhs, Vec3 rhs)
 		{
 			return Vec3(lhs[0] + rhs[0], lhs[1] + rhs[1], lhs[2] + rhs[2]);
 		}
 
 		[Inline]
-		public static Vec3 operator-(Vec3 lhs, Vec3 rhs)
+		public static Vec3 operator -(Vec3 lhs, Vec3 rhs)
 		{
 			return Vec3(lhs[0] - rhs[0], lhs[1] - rhs[1], lhs[2] - rhs[2]);
 		}
 
 		[Inline]
-		public static Vec3 operator*(Vec3 lhs, Vec3 rhs)
+		public static Vec3 operator *(Vec3 lhs, Vec3 rhs)
 		{
 			return Vec3(lhs[0] * rhs[0], lhs[1] * rhs[1], lhs[2] * rhs[2]);
 		}
 
 		[Inline]
-		public static Vec3 operator*(double t, Vec3 v)
+		public static Vec3 operator *(double t, Vec3 v)
 		{
 			return Vec3(v[0] * t, v[1] * t, v[2] * t);
 		}
 
 		[Inline]
-		public static Vec3 operator*(Vec3 v, double t)
+		public static Vec3 operator *(Vec3 v, double t)
 		{
 			return Vec3(v[0] * t, v[1] * t, v[2] * t);
 		}
 
 		[Inline]
-		public static Vec3 operator/(Vec3 v, double t)
+		public static Vec3 operator /(Vec3 v, double t)
 		{
 			return (1 / t) * v;
 		}

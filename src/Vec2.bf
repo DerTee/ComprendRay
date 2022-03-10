@@ -5,7 +5,7 @@ namespace ComprendRay
 	struct Vec2
 	{
 		public double[2] e;
-		private static Random rand = new Random() ~ delete _;
+		private static prng_beef.Xoroshiro128Plus rand = prng_beef.Xoroshiro128Plus();
 
 		public this()
 		{
