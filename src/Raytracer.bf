@@ -25,23 +25,6 @@ namespace ComprendRay.Raytracer
 					let pixel = ray_color(ref r, world, render_params.max_depth);
 					pixels[x, y] = pixel;
 
-					// DeBUGGING:
-					dbgpixelstuff:
-					{
-						if (x > 10 && pixel != Color(0, 0, 0))
-						{
-							let prev_pixel = pixels[x - 1, y];
-							let prev2_pixel = pixels[x - 2, y];
-							let diff1 = (Math.Abs(pixel.x - prev_pixel.x) + Math.Abs(pixel.y - prev_pixel.y) + Math.Abs(pixel.z - prev_pixel.z)) / 3;
-							let diff2 = (Math.Abs(pixel.x - prev2_pixel.x) + Math.Abs(pixel.y - prev2_pixel.y) + Math.Abs(pixel.z - prev2_pixel.z)) / 3;
-							if (diff1 < 0.0001 && diff2 < 0.0001)
-							{
-								// System.Diagnostics.Debug.SafeBreak();
-							}
-						}
-					}
-
-
 					// ToDo This is shitty UX, because during rendering not all samples are done, so dividing by
 					// samples_per_pixel makes the image too dark in the beginning and that only improves with more
 					// samples being done
