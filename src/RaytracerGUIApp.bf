@@ -21,6 +21,7 @@ namespace ComprendRay
 
 		HittableList mScene;
 
+		private static int32 mSceneGenerationSeed = 0;
 		// Camera
 		ComprendRay.Camera mCam;
 
@@ -94,7 +95,8 @@ namespace ComprendRay
 				if (pressed_new_scene)
 				{
 					delete mScene;
-					mScene = create_random_scene();
+					mSceneGenerationSeed++;
+					mScene = create_random_scene(mSceneGenerationSeed);
 				}
 				if (pressed_increase_samples) mRenderParameters.samples_per_pixel = (uint16)Math.Min(11, mRenderParameters.samples_per_pixel + 1);
 				if (pressed_decrease_samples) mRenderParameters.samples_per_pixel = (uint16)Math.Max(1, mRenderParameters.samples_per_pixel - 1);
