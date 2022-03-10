@@ -5,6 +5,9 @@ Dependencies = {corlib = "*", raylib-beef = "*"}
 Name = "ComprendRay"
 StartupObject = "ComprendRay"
 
+[Platform.Windows]
+IconFile = "dist/icon_01.ico"
+
 [Configs.Release.Win64]
 StackSize = 4096
 OptimizationLevel = "O2"
