@@ -31,10 +31,12 @@ namespace ComprendRay.Raytracer
 						if (x > 10 && pixel != Color(0, 0, 0))
 						{
 							let prev_pixel = pixels[x - 1, y];
-							let prev2_pixel = pixels[x - 1, y];
-							if (prev_pixel == pixel && prev2_pixel == pixel)
+							let prev2_pixel = pixels[x - 2, y];
+							let diff1 = (Math.Abs(pixel.x - prev_pixel.x) + Math.Abs(pixel.y - prev_pixel.y) + Math.Abs(pixel.z - prev_pixel.z)) / 3;
+							let diff2 = (Math.Abs(pixel.x - prev2_pixel.x) + Math.Abs(pixel.y - prev2_pixel.y) + Math.Abs(pixel.z - prev2_pixel.z)) / 3;
+							if (diff1 < 0.0001 && diff2 < 0.0001)
 							{
-								System.Diagnostics.Debug.SafeBreak();
+								// System.Diagnostics.Debug.SafeBreak();
 							}
 						}
 					}
