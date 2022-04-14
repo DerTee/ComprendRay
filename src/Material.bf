@@ -50,7 +50,7 @@ namespace ComprendRay
 	class Dielectric : Material
 	{
 		public double ref_idx;
-		private static prng_beef.Xoroshiro128Plus rand = prng_beef.Xoroshiro128Plus();
+		private static prng_beef.Xoroshiro128Plus rand = prng_beef.Xoroshiro128Plus((uint64)System.Platform.BfpSystem_GetTimeStamp());
 
 		public this(double i)
 		{

@@ -39,6 +39,7 @@ namespace ComprendRay
 				10 // focus_dist
 				);
 			mBuffer = new RenderBuffer(mRenderParameters);
+			mRenderThreadPool.Init();
 
 			screenwidth = 800;
 			screenheight = 600;

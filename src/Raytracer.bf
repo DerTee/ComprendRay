@@ -13,7 +13,7 @@ namespace ComprendRay.Raytracer
 		public static void render_scene(ref HittableList world, ref Camera cam, ref RenderBuffer buffer, uint16 sample)
 		{
 			let render_params = buffer.renderparameters;
-			var rand = prng_beef.Xoroshiro128Plus();
+			var rand = prng_beef.Xoroshiro128Plus((uint64)System.Platform.BfpSystem_GetTimeStamp());
 			let pixels = buffer.pixelbuffers[sample].pixels;
 			for (int32 y < render_params.image_height)
 			{

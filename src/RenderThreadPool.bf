@@ -15,6 +15,15 @@ namespace ComprendRay
 		public RenderBuffer RenderBuffer;
 		public uint16 MaxStackSizeRenderThread = 16;
 
+		public void Init() mut
+		{
+			var result = Platform.BfpSystemResult();
+			var numLogicalCPUs = Platform.BfpSystem_GetNumLogicalCPUs(&result);
+
+			if (result case .Ok) NumThreads = .(Math.Max(numLogicalCPUs - 1, 1));
+			else Runtime.FatalError("Fatal error while trying to determine number of logical CPUs to adjust number of render threads.");
+		}
+
 		public bool IsRunning()
 		{
 			if (RenderThreads == null || RenderThreads.Count == 0) return false;

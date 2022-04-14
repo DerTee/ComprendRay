@@ -1,5 +1,5 @@
 FileVersion = 1
-Dependencies = {corlib = "*", raylib-beef = "*", prngs-beef = "*"}
+Dependencies = {corlib = "*", raylib-beef = "*", prng-beef = "*"}
 
 [Project]
 Name = "ComprendRay"
