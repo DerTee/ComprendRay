@@ -1,0 +1,7 @@
+FileVersion = 1
+Dependencies = {corlib = "*", corlib = "*"}
+
+[Project]
+Name = "prng-beef"
+TargetType = "BeefLib"
+StartupObject = "prng_beef.Program"
